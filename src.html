@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RealmTester post</title>
+    <style>
+        a:visited, a:link {
+            color: blue;
+        }
+
+        a:hover {
+            color: orangered;
+        }
+
+        a:active {
+            color: black;
+        }
+
+        html, input, textarea, button {
+            /*font-family: sans-serif;*/
+            font-family: monospace;
+        }
+    </style>
+    <style>
+        nav.topBar {
+            box-sizing: content-box;
+            height: calc(4.4rem + 4px);
+            vertical-align: middle;
+
+            > img {
+                vertical-align: middle;
+                height: 4rem;
+                width: auto;
+            }
+
+            border-bottom: 2px grey solid;
+        }
+
+        body, h1 {
+            margin: 0;
+        }
+
+        .main {
+            margin: auto;
+            width: 88%;
+        }
+
+        span.badge {
+            /*flair_color*/;
+            color: white;
+            padding: 0.2em 0.4em;
+            text-align: center;
+            border-radius: 5px;
+        }
+    </style>
+    <style>
+        .comment {
+            margin-left: 0.4ch;
+            padding-left: 0.5ch;
+            border-left: 0.1ch grey solid;
+        }
+    </style>
+</head>
+<body>
+<nav class="topBar">
+    <img src="favicond.svg" width="512" height="512" alt="RealmTester logo"/>
+    RealmTester
+    (<label>search {{RealmTester.subrealm}}: <input type="search" placeholder="searchIndexed"></label>)
+</nav>
+<div class="main">
+    <nav style="display: flex;flex-direction: row; align-items: center;">
+        <img src="favicond.svg" width="512" height="512" alt="RealmTester logo"
+             style="height: 4rem; width: auto;vertical-align: text-top"/>
+        <span style="display:inline;vertical-align: middle">
+            <span>{{RealmTester.subrealm}}</span>
+            <time>4 hours ago</time>
+            <br>
+            <span>{{RealmTester.author}}</span>
+        </span>
+    </nav>
+    <h1>{{RealmTester.title}}</h1>
+    <span class="flair badge flair_{{flair_css_class}}" data-flair_hidden hidden="hidden">{{flair_text}}</span>
+    <div role=none>{{RealmTester.body}}</div>
+    <span>comments: <span><!--comment_counted--></span></span>
+    <div style="border-top:2px grey solid;margin-bottom:1em" role=none></div>
+    <section class="section-comment"><!--comments--></section>
+</div>
+</body>
+</html>
