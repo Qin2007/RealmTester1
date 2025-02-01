@@ -18,11 +18,18 @@
 
         html, input, textarea, button {
             /*font-family: sans-serif;*/
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+            Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+            font-size: 1rem;
+        }
+
+        input, textarea, button {
             font-family: monospace;
         }
     </style>
     <style>
         nav.topBar {
+            background-color: white;
             box-sizing: content-box;
             height: calc(4.4rem + 4px);
             vertical-align: middle;
@@ -48,42 +55,222 @@
         span.badge {
             /*flair_color*/;
             color: white;
-            padding: 0.2em 0.4em;
+            padding: 0.1em 0.2em;
             text-align: center;
             border-radius: 5px;
         }
     </style>
     <style>
-        .comment {
+        body {
+            background-color: lightgray;
+        }
+
+        .comment, .post {
+            background-color: white;
+            padding-left: 1ch;
+            margin-top: 1em;
+        }
+
+        /*.commentBody, .replies {*/
+        p:first-child {
+            margin-top: 0;
+        }
+
+        p:last-child {
+            margin-bottom: 0;
+        }
+
+        /*}*/
+
+        .replies {
             margin-left: 0.4ch;
             padding-left: 0.5ch;
             border-left: 0.1ch grey solid;
         }
+
+        .commentBody {
+            margin-top: 1em;
+            /*padding-top: 1em;*/
+        }
+
+        details > summary {
+            font-family: monospace;
+        }
+
+        .section-comment > details {
+            padding-bottom: 0.5em;
+            padding-top: 0.5em;
+        }
+
+        details:not([open]) > summary {
+            list-style-type: '[+] ';
+        }
+
+        details[open] > summary {
+            list-style-type: '[-] ';
+        }
     </style>
+    <script>
+        // TimeInterval
+        class TimeInterval {
+            constructor(hours = null, minutes = null, seconds = null, months = null, days = null, years = null) {
+                this.throwOnNegative(Number(hours), Number(minutes), Number(seconds), Number(months), Number(days), Number(years));
+                this.hours = Number(hours);
+                this.minutes = Number(minutes);
+                this.seconds = Number(seconds);
+                this.months = Number(months);
+                this.days = Number(days);
+                this.years = Number(years);
+            }
+
+            throwOnNegative(hours, minutes, seconds, months, days, years) {
+                if (!isNaN(hours) && hours < 0) throw new Error('hours is negative');
+                if (!isNaN(minutes) && minutes < 0) throw new Error('minutes is negative');
+                if (!isNaN(seconds) && seconds < 0) throw new Error('seconds is negative');
+                if (!isNaN(months) && months < 0) throw new Error('months is negative');
+                if (!isNaN(days) && days < 0) throw new Error('days is negative');
+                if (!isNaN(years) && years < 0) throw new Error('years is negative');
+            }
+
+            /*toMachineString(useIForMinutes = false) {
+                let result = '';
+                if (this.years !== null) result += `${this.years}Y`;
+                if (this.months !== null) result += `${this.months}M`;
+                if (this.days !== null) result += `${this.days}D`;
+                if (this.hours !== null || this.minutes !== null || this.seconds !== null) {
+                    result += 'T';
+                    if (this.hours !== null) result += `${this.hours}H`;
+                    if (this.minutes !== null) result += `${this.minutes}${Boolean(useIForMinutes) ? 'I' : 'M'}`;
+                    if (this.seconds !== null) result += `${this.seconds}S`;
+                }
+                return `P${result}`;
+            }*/
+
+            toHumanString() {
+                const parts = [];
+                if (this.years && this.years > 0) parts.push(`${this.years} year${this.years > 1 ? 's' : ''}`);
+                if (this.months && this.months > 0) parts.push(`${this.months} month${this.months > 1 ? 's' : ''}`);
+                if (this.days && this.days > 0) parts.push(`${this.days} day${this.days > 1 ? 's' : ''}`);
+                if (this.hours && this.hours > 0) parts.push(`${this.hours} hour${this.hours > 1 ? 's' : ''}`);
+                if (this.minutes && this.minutes > 0) parts.push(`${this.minutes} minute${this.minutes > 1 ? 's' : ''}`);
+                if (this.seconds && this.seconds > 0) parts.push(`${this.seconds} second${this.seconds > 1 ? 's' : ''}`);
+                if (parts.length === 0) return "0 seconds";
+                parts.splice(2, +Infinity);
+                const last = parts.pop();
+                if (parts.length === 0) return last;
+                return `${parts.join(', ')} and ${last}`;
+            }
+
+            toString() {
+                return this.toHumanString();
+            }
+
+            /*add(hours = 0, minutes = 0, seconds = 0, months = 0, days = 0, years = 0) {
+                this.throwOnNegative(this.hours + Number(hours), this.minutes + Number(minutes), this.seconds + Number(seconds), this.months + Number(months), this.days + Number(days), this.years + Number(years));
+                this.hours += Number(hours);
+                this.minutes += Number(minutes);
+                this.seconds += Number(seconds);
+                this.months += Number(months);
+                this.days += Number(days);
+                this.years += Number(years);
+                return this;
+            }
+
+            overflow(date) {
+                const overflownDate = this.addIntervalToDate(date)
+                return this.constructor.differenceBetween(overflownDate, new Date(date));
+            }*/
+
+            static differenceBetween(dateLeft, dateRight) {
+                const overflownDate = new Date(dateLeft);
+                const baseDate = new Date(dateRight);
+                return new TimeInterval(
+                    Math.max(overflownDate.getHours(), baseDate.getHours()) -
+                    Math.min(overflownDate.getHours(), baseDate.getHours()),
+                    Math.max(overflownDate.getMinutes(), baseDate.getMinutes()) -
+                    Math.min(overflownDate.getMinutes(), baseDate.getMinutes()),
+                    Math.max(overflownDate.getSeconds(), baseDate.getSeconds()) -
+                    Math.min(overflownDate.getSeconds(), baseDate.getSeconds()),
+                    Math.max(overflownDate.getMonth(), baseDate.getMonth()) -
+                    Math.min(overflownDate.getMonth(), baseDate.getMonth()),
+                    Math.max(overflownDate.getDate(), baseDate.getDate()) -
+                    Math.min(overflownDate.getDate(), baseDate.getDate()),
+                    Math.max(overflownDate.getFullYear(), baseDate.getFullYear()) -
+                    Math.min(overflownDate.getFullYear(), baseDate.getFullYear()),
+                );
+            }
+
+            /*addIntervalToDate(date) {
+                date = new Date(date);
+                return new Date(
+                    date.getFullYear() + this.years,
+                    date.getMonth() + this.months,
+                    date.getDate() + this.days,
+                    date.getHours() + this.hours,
+                    date.getMinutes() + this.minutes,
+                    date.getSeconds() + this.seconds,
+                );
+            }*/
+        }
+
+        window.document.addEventListener('DOMContentLoaded', function () {
+            const today = new Date(/*datetime-local*/);
+            document.querySelectorAll('time.toLocalTime').forEach(function (each) {
+                each.innerText = TimeInterval.differenceBetween(today, new Date(each.dateTime)).toHumanString();
+                each.setAttribute('title', (new Date(each.dateTime)).toString());
+                //each.innerText = `${new Date(each.dateTime)}`.replace(/ GMT.+/, '');
+            });
+            const regexp = /(?:(\d+)Y)?,?\s*(?:(\d+)M)?,?\s*(?:(\d+)D)?,?\s*(?:(\d+)H)?,?\s*(?:(\d+)i)?,?\s*(?:(\d+)s)?/i;
+            document.querySelectorAll('time[data-toLocalTime]').forEach(function (each) {
+                console.log(each.getAttribute('data-toLocalTime'));
+                const regexArray = regexp.exec(each.getAttribute('data-toLocalTime'));
+                if (regexArray) {
+                    const date = today;
+                    const array = new Date(
+                        date.getFullYear() - +(regexArray[1] ?? 0),
+                        date.getMonth() - +(regexArray[2] ?? 0),
+                        date.getDate() - +(regexArray[3] ?? 0),
+                        date.getHours() - +(regexArray[4] ?? 0),
+                        date.getMinutes() - +(regexArray[5] ?? 0),
+                        date.getSeconds() - +(regexArray[6] ?? 0));
+                    each.innerText = TimeInterval.differenceBetween(today, array).toHumanString();
+                    each.setAttribute('title', array.toString());
+                } else {
+                    each.outerHTML = '<span class="timeError">Time failed to load</span>';
+                }
+            });
+        });
+    </script>
 </head>
 <body>
 <nav class="topBar">
     <img src="favicond.svg" width="512" height="512" alt="RealmTester logo"/>
     RealmTester
     (<label>search {{RealmTester.subrealm}}: <input type="search" placeholder="searchIndexed"></label>)
+    <a href="https://github.com/Qin2007/RealmTester1">Github</a>
 </nav>
 <div class="main">
-    <nav style="display: flex;flex-direction: row; align-items: center;">
-        <img src="favicond.svg" width="512" height="512" alt="RealmTester logo"
-             style="height: 4rem; width: auto;vertical-align: text-top"/>
-        <span style="display:inline;vertical-align: middle">
+    <div class="post">
+        <div style="display: flex;flex-direction: row; align-items: center;">
+            <img src="favicond.svg" width="512" height="512" alt="RealmTester logo"
+                 style="height: 4rem; width: auto;vertical-align: text-top"/>
+            <span style="display:inline;vertical-align: middle">
             <span>{{RealmTester.subrealm}}</span>
-            <time>4 hours ago</time>
+            &bull; <time>{{temporaryTime}}</time>
             <br>
             <span>{{RealmTester.author}}</span>
+            <span>{{RealmTester.mark}}</span>
         </span>
-    </nav>
-    <h1>{{RealmTester.title}}</h1>
-    <span class="flair badge flair_{{flair_css_class}}" data-flair_hidden hidden="hidden">{{flair_text}}</span>
-    <div role=none>{{RealmTester.body}}</div>
-    <span>comments: <span><!--comment_counted--></span></span>
-    <div style="border-top:2px grey solid;margin-bottom:1em" role=none></div>
+        </div>
+        <h1>{{RealmTester.title}}</h1>
+        <span class="flair badge flair_{{flair_css_class}}" data-flair_hidden hidden="hidden">{{flair_text}}</span>
+        <div style="border-bottom:2px grey solid; padding: 0.75em 0" role=none>{{RealmTester.body}}</div>
+        <span><!--post votes--><span><!--comment_counted--></span> comments</span>
+    </div>
+    <div style="margin-bottom:1em" role=none></div>
     <section class="section-comment"><!--comments--></section>
+    <div style="height:32vh" role=none></div>
+    <div class="commentBody comment replies" hidden></div>
 </div>
 </body>
 </html>
