@@ -9,6 +9,8 @@ to make a fake convo simply make a `comments.yaml` in the directory.
 [download python from python.org](https://www.python.org/downloads/) and make python
 install `requirements.txt` (`pip install -r requirements.txt` or the path to that file)
 
+note that this will need to set up a web server to localhost:8080. which is how the user interface is displayed. to actually see your realm conversation go to that domain
+
 # yaml config
 
 in the yaml configuration you write the exact convocation you want your characters to have (profile images not
