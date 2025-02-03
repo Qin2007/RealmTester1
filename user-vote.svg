@@ -1,12 +1,5 @@
-<svg viewBox="0 0 1024 512" width="1024" height="512" xmlns="http://www.w3.org/2000/svg">
-    <rect width="1024" height="512" fill="#121212"/>
-    <path d="M 128 192 l 64 -64 l 64 64 h -32 v 192 h -64 v -192 Z" fill="black" stroke-width="8" stroke="white"/>
-    <text fill="white" id="text" font-size="256"
-          alignment-baseline="middle"
-          text-anchor="middle"
-          font-family="monospace"
-          y="256" x="512">
-        ??
-    </text>
-    <path d="M 768 320 l 64 64 l 64 -64 h -32 v -192 h -64 v 192 Z" fill="black" stroke-width="8" stroke="white"/>
+<svg viewBox="0 0 512 512" width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+    <rect width="512" height="512" fill="#ffffff"/>
+    <path d="M 128 192 l 128 -128 l 128 128 h -64 v 256 h -128 v -256 Z" fill="#ffffff"
+          stroke-width="32" stroke="#000000"/>
 </svg>

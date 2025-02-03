@@ -200,6 +200,10 @@ def casefold(anything):
     return str(anything).casefold()
 
 
+class CommentError(Exception):
+    pass
+
+
 class Comment:
     moderator_marking = ' <span style="color:green;font-weight:bold">MOD</span>'
 
@@ -218,14 +222,23 @@ class Comment:
             self.current_user_vote = True
         else:
             self.current_user_vote = None
+        if isinstance((my_user_vote := display_votes(
+                comment_dict.get('current_user_vote', None),
+                comment_dict.get('votes', 1)
+        )), web.Response):
+            raise CommentError(f'{my_user_vote}')
+        else:
+            self.v = my_user_vote
+        pass
 
     def __str__(self):
         user_markings = ' <span style="color:blue;font-weight:bold">OP</span>' if self.author.is_original_poster else ''
         user_markings = Comment.moderator_marking if self.is_moderator else user_markings
         markings = html_encode(self.author.username) + user_markings
         replies = ''.join(str(i) for i in self.replies)
+        v = self.v
         return f'<details open="" class=comment role=article><summary>{markings}</summary><div class=commentBody' \
-            + f'>{self.body}</div><div role="none" class="replies">{replies}</div></details>'
+            + f'>{self.body}</div><div role=none>{v}</div><div role=none class="replies">{replies}</div></details>'
         pass
 
     def add_reply(self, comment: typing.Self):
@@ -252,40 +265,118 @@ def to_number(number):
         return int(number)
     else:
         return float('nan')
+    pass
 
 
-@routes.get('/vote')
-async def current_user_vote(request: web.Request) -> web.Response:
-    text = '<svg viewBox="0 0 1024 512" width="1024" height="512" xmlns="http://www.w3.org/2000/svg">'
-    match (side := (counter := dict(request.query)).get('vote', 'n')):
+# @routes.get('/vote')
+# async def current_user_vote(request: web.Request) -> web.Response:
+#     text = '<svg viewBox="0 0 1024 512" width="1024" height="512" xmlns="http://www.w3.org/2000/svg">'
+#     match (side := (counter := dict(request.query)).get('vote', 'n')):
+#         case 'u':
+#             color = '#ff7126'
+#             voted = True
+#         case 'd':
+#             color = '#aaaaff'
+#             voted = True
+#         case _:
+#             color = '#ffffff'
+#             voted = False
+#     text += f'<rect width="1024" height="512" fill="{color}"/>'
+#     # path_up = 'M 128 192 l 64 -64 l 64 64 h -32 v 192 h -64 v -192 Z'
+#     # path_down = 'M 768 320 l 64 64 l 64 -64 h -32 v -192 h -64 v 192 Z'
+#     path_up2__ = 'M 64 192 l 128 -128 l 128 128 h -64 v 256 h -128 v -256 Z'
+#     path_down2 = 'M 960 320 l -128 128 l -128 -128 h 64 v -256 h 128 v 256 Z'
+#     vote_counter = str(to_number(counter.get('counter', '0')))
+#     stroke_width = 32
+#     upvote___color = '#ff7126'
+#     downvote_color = '#aaaaff'
+#     backg____color = stroke = '#000000' if voted else "#ffffff"
+#     text += f'<path d="{path_up2__}" fill="{backg____color}" stroke-width="{stroke_width}" stroke="#000000"/>'
+#     text += f'<path d="{path_down2}" fill="{backg____color}" stroke-width="{stroke_width}" stroke="#000000"/>'
+#     if side == 'u':
+#         text += f'<path d="{path_down2}" fill="{upvote___color}" stroke-width="{stroke_width}" stroke="{stroke}"/>'
+#     text += '<text fill="black" id="text" font-size="256" dominant-baseline="middle" text-anchor="middle" ' + \
+#             'font-family="monospace" y="256" x="512">' + vote_counter + '</text>'
+#     if side == 'd':
+#         text += f'<path d="{path_up2__}" fill="{downvote_color}" stroke-width="{stroke_width}" stroke="{stroke}"/>'
+#     return web.Response(text=f'{text}</svg>\n', content_type='image/svg+xml')
+
+
+@routes.get('/vote-v2')
+async def upvote_button(request: web.Request) -> web.Response:
+    text = '<svg viewBox="0 0 512 512" width="512" height="512" xmlns="http://www.w3.org/2000/svg">'
+    path_up2__ = 'M 96 192 l +128 -128 l +128 +128 h -64 v +256 h -128 v -256 Z'
+    path_down2 = 'M 96 320 l +128 +128 l +128 -128 h -64 v -256 h -128 v +256 Z'
+    stroke_width = 32
+    request_dict = dict(request.query)
+    voted_on = '#000000' if (request_dict.get('voted-on', 'F') == 'T') else 'transparent'
+    match request_dict.get('vote-type', 'n'):
         case 'u':
-            color = '#ff7126'
+            text += f'<path d="{path_up2__}" fill="{voted_on}" stroke-width="{stroke_width}" stroke="#000000"/>'
         case 'd':
+            text += f'<path d="{path_down2}" fill="{voted_on}" stroke-width="{stroke_width}" stroke="#000000"/>'
+        case _:
+            pass
+    return web.Response(text=f'{text}</svg>\n', content_type='image/svg+xml')
+
+
+def bool_to_string(boolean: bool) -> str:
+    return 'T' if boolean else 'F'
+
+
+def display_votes(my_user_vote, votes: int, style: str = ''):
+    if isinstance(my_user_vote, str):
+        match my_user_vote.casefold():
+            case 'up':
+                my_user_vote = True
+            case 'down':
+                my_user_vote = False
+            case _:
+                my_user_vote = None
+    elif isinstance(my_user_vote, int) and not (my_user_vote is False or my_user_vote is True):
+        match my_user_vote:
+            case 1:
+                my_user_vote = True
+            case (-1):
+                my_user_vote = False
+            case _:
+                my_user_vote = None
+    if not (my_user_vote is None or my_user_vote is False or my_user_vote is True):
+        return display_error('all current user votes must be [true, false, null, \'up\', \'down\', 1, or 0] (1)')
+    t = True
+    f = False
+    attrs = ' class=vote-botton width=512 height=512'
+    upvote = f'<img src=\"vote-v2?vote-type=u&amp;voted-on={bool_to_string(my_user_vote is t)}\" {attrs} alt=upvote>'
+    dwvote = f'<img src=\"vote-v2?vote-type=d&amp;voted-on={bool_to_string(my_user_vote is f)}\" {attrs} alt=downvote>'
+    match my_user_vote:
+        case True:
+            color = '#ff7126'
+        case False:
             color = '#aaaaff'
         case _:
-            color = 'white'
-    text += f'<rect width="1024" height="512" fill="{color}"/>'
-    path_up = 'M 128 192 l 64 -64 l 64 64 h -32 v 192 h -64 v -192 Z'
-    path_down = 'M 768 320 l 64 64 l 64 -64 h -32 v -192 h -64 v 192 Z'
-    if side == 'u':
-        text += f'<path d="{path_up}" fill="#ff7126" stroke-width="8" stroke="#000000"/>'
-    else:
-        text += f'<path d="{path_up}" fill="#000000" stroke-width="8" stroke="#000000"/>'
-    text += '<text fill="black" id="text" font-size="256" dominant-baseline="middle" text-anchor="middle" ' + \
-            'font-family="monospace" y="256" x="512">' + str(to_number(counter.get('counter', '0'))) + '</text>'
-    if side == 'd':
-        text += f'<path d="{path_down}" fill="#aaaaff" stroke-width="8" stroke="#000000"/>'
-    else:
-        text += f'<path d="{path_down}" fill="#000000" stroke-width="8" stroke="#000000"/>'
+            color = '#ffffff'
+    style += f';background-color:{color};'
+    return f"<span class=vote-container style='{style}' role=none>{upvote} {votes} {dwvote}</span>"
 
-    return web.Response(text=f'{text}</svg>', content_type='image/svg+xml')
+
+def display_error(error_text: str) -> web.Response:
+    text = f'<style>body{{}}*{{font-family:monospace}}</style><h1>You have malformed data</h1>'
+    return web.Response(text=f'<!DOCTYPE html>{text}<pre>{html_encode(error_text)}', content_type='text/html')
+
+
+pass
+# @routes.get('/view-source.html')
+# async def comments_function(_: web.Request) -> web.Response:
+#     with open('view-source.html', 'rt', encoding='utf8') as src:
+#         text = src.read()
+#     return web.Response(text=text, content_type='text/html')
+pass
 
 
 @routes.get('/')
 async def comments_function(_: web.Request) -> web.Response:
     if (post := load_comments()).get('status', 200) != 200:
-        text = f'<style>body{{}}*{{font-family:monospace}}</style><h1>You have malformed data</h1>'
-        return web.Response(text=f'<!DOCTYPE html>{text}<pre>{html_encode(post['error'])}', content_type='text/html')
+        return display_error(str(post['error']))
     with open('src.html', 'rt', encoding='utf8') as src:
         text = src.read()
     title = html_encode((post := load_comments()).get('post', dict()).get('title', '(untitled) RealmTester post'))
@@ -303,6 +394,11 @@ async def comments_function(_: web.Request) -> web.Response:
     text = text.replace('/*flair_color*/', 'background-color:' +
                         html_encode(post.get('flair_color', '#ff4500')))
     text = text.replace('/*datetime-local*/', f"'{datetime.now().isoformat()}'")
+    if isinstance((my_user_vote := display_votes(
+            post.get('current_user_vote', None),
+            post.get('votes', 1), 'border-top:none')), web.Response):
+        return my_user_vote
+    text = text.replace('<!--post votes-->', f"{my_user_vote} ")
     # datetime(2024, 6, 19)
     datetime_local = post.get('date', 'PT0S')
     if isinstance(datetime_local, datetime) or isinstance(datetime_local, date) or isinstance(datetime_local, time):
@@ -323,9 +419,8 @@ async def comments_function(_: web.Request) -> web.Response:
         text = text.replace('{{RealmTester.author}}', html_encode(user.name))
         text = text.replace('{{RealmTester.mark}}', (
             Comment.moderator_marking if (post.get('is_moderator') is True)
-            else str()
-        ))
-
+            else str()))
+        pass
     text = text.replace('{{RealmTester.body}}', markdown2.markdown(post.get('body', '[empty]')))
     if len(post.get('flair_text', '')) > 0:
         text = text.replace('data-flair_hidden hidden="hidden"', 'data-until-found=""')

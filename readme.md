@@ -48,7 +48,7 @@ that is a basic example of what to write.
   for example `7i 5s` is 7 minutes and 5 seconds ago
 - `current_user_vote:` current_user_vote is either "up" or "down" or "none" (DEFAULT="none"), [true, false, null] works
   too. current user vote is how the votes are displayed, if its `up` then it will look like you upvoted
-- `votes:` (currently not implemented) (must be a valid number) is the score displayed, unaffected by `current_user_vote:`
+- `votes:` (must be a valid number) is the score displayed, unaffected by `current_user_vote:`
 
 the main thing you'll be here for is
 
@@ -61,10 +61,10 @@ the main thing you'll be here for is
   minutes), `D` for days, `H` for hours, `i` for minutes, and `s` for seconds  
   otherwise it can be a valid timestamp formatted `YYYY-MM-DD`  
   for example `7i 5s` is 7 minutes and 5 seconds ago
-- `current_user_vote:` (currently not implemented) current_user_vote is either "up" or "down" or "none" (DEFAULT="
+- `current_user_vote:`  current_user_vote is either "up" or "down" or "none" (DEFAULT="
   none"), [true, false, null] works too. current user vote is how the votes are displayed, if its `up` then it will look
   like you upvoted
-- `votes:` (currently not implemented) (must be a valid number) is the score displayed, unaffected
+- `votes:` (must be a valid number) is the score displayed, unaffected
   by `current_user_vote:`
 - `is_locked:` (currently not implemented) whether a comment is locked (boolean)
 - `is_stickied:` (currently not implemented) whether a comment is stickied, note that only top level comments can be

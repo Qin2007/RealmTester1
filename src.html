@@ -68,7 +68,7 @@
         .comment, .post {
             background-color: white;
             padding-left: 1ch;
-            margin-top: 1em;
+            margin-top: 0.75em;
         }
 
         /*.commentBody, .replies {*/
@@ -89,7 +89,8 @@
         }
 
         .commentBody {
-            margin-top: 1em;
+            margin-top: 0.5em;
+            margin-bottom: 0.5em;
             /*padding-top: 1em;*/
         }
 
@@ -108,6 +109,20 @@
 
         details[open] > summary {
             list-style-type: '[-] ';
+        }
+
+        /*.vote-counter{width:auto;height:1em;vertical-align:middle;border: 2px solid gray;}*/
+
+        .vote-container {
+            border: 2px solid gray;
+            height: fit-content;
+            display: inline-block;
+
+            .vote-botton {
+                width: auto;
+                height: 1.5em;
+                vertical-align: middle;
+            }
         }
     </style>
     <script>
@@ -267,7 +282,6 @@
         <div style="border-bottom:2px grey solid; padding: 0.75em 0" role=none>{{RealmTester.body}}</div>
         <span><!--post votes--><span><!--comment_counted--></span> comments</span>
     </div>
-    <div style="margin-bottom:1em" role=none></div>
     <section class="section-comment"><!--comments--></section>
     <div style="height:32vh" role=none></div>
     <div class="commentBody comment replies" hidden></div>
